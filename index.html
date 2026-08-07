@@ -687,39 +687,63 @@
 
   /* ---- mobile ---- */
   .mobile-tabbar{ display:none; }
+  .panel-close{ display:none; }
 
-  @media (max-width:1024px){
+  @media (max-width:720px){
     .sidebar{
       position:fixed;
-      inset:auto 0 0 0;
-      top:auto;
-      height:min(48vh, 420px);
+      inset:0;
+      height:auto;
       z-index:60;
-      border-inline-start:none;
-      border-top:2px solid var(--ink);
-      width:100%;
-      transform:translateY(calc(100% - 54px));
-      transition:transform 0.3s ease;
-      flex-direction:column;
+      border:none;
+      width:auto;
+      background:transparent;
+      pointer-events:none;
+      display:block;
     }
-    .sidebar.open{ transform:translateY(0); }
     .tabs{
+      position:fixed;
+      left:0; right:0; bottom:0;
       flex-direction:row;
       width:100%;
       height:54px;
       border-inline-start:none;
-      border-top:none;
-      border-bottom:2px solid var(--ink);
+      border-top:2px solid var(--ink);
+      border-bottom:none;
       justify-content:flex-start;
       padding:0;
       gap:4px;
       overflow-x:auto;
       overflow-y:hidden;
+      background:var(--paper);
+      pointer-events:auto;
     }
     .tab-btn{ width:52px; min-width:52px; height:48px; }
-    .tab-panels{ padding:14px 18px; }
+    .tab-panels{
+      position:fixed;
+      top:58px; right:0; bottom:54px;
+      width:min(88vw, 340px);
+      padding:52px 18px 18px;
+      background:var(--paper-alt);
+      border-left:2px solid var(--ink);
+      box-shadow:-12px 0 30px rgba(27,16,53,.18);
+      transform:translateX(105%);
+      transition:transform .28s ease;
+      overflow-y:auto;
+      pointer-events:auto;
+    }
+    .sidebar.open .tab-panels{ transform:translateX(0); }
+    .panel-close{ display:flex; position:absolute; top:12px; left:12px; width:30px; height:30px; border:2px solid var(--ink); border-radius:50%; align-items:center; justify-content:center; background:#fff; font-weight:900; z-index:2; }
     .canvas-scroll{ padding:16px; padding-bottom:70px; }
-    .float-toolbar{ margin:8px auto 0; padding:8px 12px; gap:9px; max-height:112px; overflow:auto; border-radius:18px; }
+    .float-toolbar{ margin:8px auto 0; max-width:calc(100% - 12px); width:calc(100% - 12px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:18px; padding:8px; gap:7px 10px; }
+    .float-toolbar > .ft-sep{ display:none !important; }
+    .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
+    #ftColorGroup{ order:1; width:100%; justify-content:center; }
+    #ftStrokeGroup{ order:2; }
+    #ftFontGroup{ order:3; }
+    #ftSizeGroup{ order:4; }
+    #ftActionsGroup{ order:5; }
+    #ftColorSwatches{ justify-content:center; }
   }
 
   @media (max-width:600px){
@@ -730,11 +754,17 @@
     .topbar-actions .btn{ padding:8px 10px; font-size:0; min-width:38px; justify-content:center; box-shadow:2px 2px 0 var(--ink); }
     .topbar-actions .btn .mobile-icon{ font-size:1rem; }
     .btn-icon{ width:34px; height:34px; }
-    .sidebar{ height:min(54vh, 430px); }
-    .tab-panels{ padding:12px; }
+    .tab-panels{ padding:52px 12px 16px; }
     .shape-grid,.sticker-grid{ grid-template-columns:repeat(4,1fr); gap:8px; }
-    .float-toolbar{ max-width:calc(100% - 12px); width:calc(100% - 12px); flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; overflow-y:hidden; border-radius:999px; }
-    .float-toolbar .ft-group{ flex-shrink:0; }
+    .float-toolbar{ max-width:calc(100% - 12px); width:calc(100% - 12px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:18px; padding:8px; gap:7px 10px; }
+    .float-toolbar > .ft-sep{ display:none !important; }
+    .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
+    #ftColorGroup{ order:1; width:100%; justify-content:center; }
+    #ftStrokeGroup{ order:2; }
+    #ftFontGroup{ order:3; }
+    #ftSizeGroup{ order:4; }
+    #ftActionsGroup{ order:5; }
+    #ftColorSwatches{ justify-content:center; }
     .canvas-scroll{ padding:10px; padding-bottom:62px; }
     .zoom-bar{ padding:7px; }
     .onboarding-overlay{ padding:8px; }
@@ -811,6 +841,7 @@
       </div>
 
       <div class="tab-panels">
+        <button class="panel-close" id="panelClose" aria-label="סגירת התפריט">✕</button>
         <!-- TEXT PANEL -->
         <div class="panel active" data-panel="text">
           <div class="panel-title">הוספת טקסט</div>
@@ -964,7 +995,7 @@
           <button class="ft-num-btn" id="ftSizeUp">+</button>
         </div>
         <div class="ft-sep"></div>
-        <div class="ft-group">
+        <div class="ft-group" id="ftActionsGroup">
           <button class="ft-icon-btn" id="ftFront" title="קדימה">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
           </button>
@@ -1665,20 +1696,31 @@
   /* ---------------- panel tabs ---------------- */
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      const sidebar = document.getElementById('sidebar');
+      const isMobile = window.matchMedia('(max-width:720px)').matches;
+      const wasActive = btn.classList.contains('active');
+      if(isMobile && wasActive && sidebar.classList.contains('open')){
+        sidebar.classList.remove('open');
+        return;
+      }
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.querySelector(`.panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
-      document.getElementById('sidebar').classList.add('open');
+      if(isMobile) sidebar.classList.add('open');
     });
   });
+  document.getElementById('panelClose').addEventListener('click', () => document.getElementById('sidebar').classList.remove('open'));
 
   /* ---------------- panel actions ---------------- */
-  document.getElementById('addTitleBtn').addEventListener('click', () => addText('title'));
-  document.getElementById('addBodyBtn').addEventListener('click', () => addText('body'));
+  function closeMobilePanel(){
+    if(window.matchMedia('(max-width:720px)').matches) document.getElementById('sidebar').classList.remove('open');
+  }
+  document.getElementById('addTitleBtn').addEventListener('click', () => { addText('title'); closeMobilePanel(); });
+  document.getElementById('addBodyBtn').addEventListener('click', () => { addText('body'); closeMobilePanel(); });
 
   document.querySelectorAll('.shape-item').forEach(btn => {
-    btn.addEventListener('click', () => addShape(btn.dataset.shape));
+    btn.addEventListener('click', () => { addShape(btn.dataset.shape); closeMobilePanel(); });
   });
 
   /* ---------------- fonts (custom dropdown, each option in its own real font) ---------------- */
@@ -1713,7 +1755,7 @@
   const stickerGrid = document.getElementById('stickerGrid');
   stickerGrid.innerHTML = stickerEmojis.map(em => `<button class="sticker-item" data-emoji="${em}">${em}</button>`).join('');
   stickerGrid.querySelectorAll('.sticker-item').forEach(btn => {
-    btn.addEventListener('click', () => addSticker(btn.dataset.emoji));
+    btn.addEventListener('click', () => { addSticker(btn.dataset.emoji); closeMobilePanel(); });
   });
 
   /* keyboard-emoji sticker input: type/paste an emoji using the OS emoji keyboard */
@@ -1723,6 +1765,7 @@
     if(!val) return;
     addSticker(val);
     customEmojiInput.value = '';
+    closeMobilePanel();
   }
   document.getElementById('addCustomEmojiBtn').addEventListener('click', addCustomEmoji);
   customEmojiInput.addEventListener('keydown', (e) => {
@@ -1733,7 +1776,7 @@
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => addImage(ev.target.result);
+    reader.onload = (ev) => { addImage(ev.target.result); closeMobilePanel(); };
     reader.readAsDataURL(file);
     e.target.value = '';
   });
