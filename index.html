@@ -1853,36 +1853,64 @@
     }
   });
 
-  document.getElementById('exportBtn').addEventListener('click', () => {
+  document.getElementById('exportBtn').addEventListener('click', async () => {
     selectedId = null;
     render();
     showToast('מייצא תמונה...');
-    setTimeout(() => {
-      const transparent = document.getElementById('transparentExport').checked;
-      const savedBackground = artboard.style.background;
-      const savedBorder = artboard.style.border;
-      const savedShadow = artboard.style.boxShadow;
+    const transparent = document.getElementById('transparentExport').checked;
+    const saved = {
+      background: artboard.style.background,
+      border: artboard.style.border,
+      boxShadow: artboard.style.boxShadow,
+      transform: artboard.style.transform,
+      transformOrigin: artboard.style.transformOrigin
+    };
+    try{
+      if(document.fonts && document.fonts.ready) await document.fonts.ready;
+      await Promise.all(Array.from(artboard.querySelectorAll('img')).map(img => {
+        if(img.complete) return img.decode ? img.decode().catch(()=>{}) : Promise.resolve();
+        return new Promise(resolve => { img.onload = img.onerror = resolve; });
+      }));
+
+      // html2canvas must receive the native artboard, not the zoomed preview.
+      artboard.style.transform = 'none';
+      artboard.style.transformOrigin = 'top left';
       if(transparent){
         artboard.style.background = 'transparent';
         artboard.style.border = 'none';
         artboard.style.boxShadow = 'none';
       }
-      html2canvas(artboard, { backgroundColor: transparent ? null : savedBackground || '#FFFFFF', scale: 2 }).then(canvas => {
-        artboard.style.background = savedBackground;
-        artboard.style.border = savedBorder;
-        artboard.style.boxShadow = savedShadow;
-        const link = document.createElement('a');
-        link.download = 'stickly-sticker.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showToast('ההורדה הושלמה! 🎉');
-      }).catch(() => {
-        artboard.style.background = savedBackground;
-        artboard.style.border = savedBorder;
-        artboard.style.boxShadow = savedShadow;
-        showToast('משהו השתבש בייצוא, נסו שוב');
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      const canvas = await html2canvas(artboard, {
+        backgroundColor: transparent ? null : (saved.background || '#FFFFFF'),
+        scale: 2,
+        width: ARTBOARD_W,
+        height: ARTBOARD_H,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: Math.max(document.documentElement.clientWidth, ARTBOARD_W),
+        windowHeight: Math.max(document.documentElement.clientHeight, ARTBOARD_H)
       });
-    }, 80);
+      const link = document.createElement('a');
+      link.download = 'stickly-sticker.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('ההורדה הושלמה! 🎉');
+    } catch(err){
+      console.error('Export failed', err);
+      showToast('משהו השתבש בייצוא, נסו שוב');
+    } finally {
+      artboard.style.background = saved.background;
+      artboard.style.border = saved.border;
+      artboard.style.boxShadow = saved.boxShadow;
+      artboard.style.transform = saved.transform;
+      artboard.style.transformOrigin = saved.transformOrigin;
+      applyScale();
+    }
   });
 
   /* ---------------- zoom ---------------- */
