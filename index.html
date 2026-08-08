@@ -102,6 +102,10 @@
   }
   .btn-icon:hover{ background:var(--ink); color:var(--paper); }
   .btn-icon svg{ width:16px; height:16px; }
+  .history-controls{ display:flex; direction:ltr; align-items:center; border:2px solid var(--ink); border-radius:999px; overflow:hidden; background:var(--paper-alt); }
+  .history-controls .btn-icon{ width:34px; height:34px; border:0; border-radius:0; background:transparent; font-size:1.2rem; font-weight:800; }
+  .history-controls .btn-icon + .btn-icon{ border-left:1.5px solid var(--ink); }
+  .history-controls .btn-icon:disabled{ color:rgba(27,16,53,.28); background:#f7f5fb; opacity:1; }
 
   /* ================= LAYOUT ================= */
   .workspace{
@@ -323,9 +327,12 @@
     border:1.5px solid var(--ink);
     display:flex; align-items:center; justify-content:center;
   }
+  .btn-icon:disabled{ opacity:.35; cursor:not-allowed; }
   .ft-icon-btn svg{ width:14px; height:14px; }
   .ft-icon-btn:hover{ background:var(--ink); color:#fff; }
   .ft-icon-btn.danger:hover{ background:var(--pink); border-color:var(--pink); }
+  .mobile-more-btn{ display:none; }
+  .mobile-tools-menu{ display:none; }
 
   .canvas-scroll{
     flex:1;
@@ -722,6 +729,7 @@
       overflow-y:hidden;
       background:var(--paper);
       pointer-events:auto;
+      transition:transform .24s ease;
     }
     .tab-btn{ width:52px; min-width:52px; height:48px; }
     .tab-panels{
@@ -740,16 +748,25 @@
     .sidebar.open .tab-panels{ transform:translateX(0); }
     .panel-close{ display:flex; position:absolute; top:12px; left:12px; width:30px; height:30px; border:2px solid var(--ink); border-radius:50%; align-items:center; justify-content:center; background:#fff; font-weight:900; z-index:2; }
     .canvas-scroll{ padding:14px; padding-bottom:118px; }
-    .float-toolbar{ margin:6px auto 0; max-width:calc(100% - 10px); width:calc(100% - 10px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:16px; padding:6px; gap:5px 7px; }
+    .float-toolbar{ position:fixed; left:0; right:0; bottom:0; z-index:80; margin:0; max-width:none; width:100%; min-height:56px; flex-wrap:nowrap; justify-content:center; overflow:visible; max-height:none; border-width:2px 0 0; border-radius:18px 18px 0 0; padding:8px 10px; gap:7px; box-shadow:0 -10px 28px rgba(27,16,53,.16); }
     .float-toolbar > .ft-sep{ display:none !important; }
     .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
     #ftColorGroup{ order:1; width:auto; justify-content:center; }
-    #ftStrokeGroup{ order:2; }
-    #ftFontGroup{ order:3; }
-    #ftEditTextGroup{ order:4; }
-    #ftSizeGroup{ order:5; }
-    #ftActionsGroup{ order:6; }
-    #ftColorSwatches{ justify-content:center; }
+    #ftEditTextGroup{ order:2; }
+    #ftSizeGroup{ order:3; }
+    #ftFontGroup{ order:6; }
+    .mobile-more-btn{ display:flex; order:5; font-size:1.25rem; }
+    #ftFontGroup,#ftStrokeGroup,#ftActionsGroup{ display:none !important; }
+    #ftStrokeGroup{ order:6; }
+    #ftActionsGroup{ order:7; }
+    .mobile-tools-menu{ position:absolute; left:10px; bottom:calc(100% + 10px); width:210px; padding:9px; grid-template-columns:1fr 1fr; gap:7px; background:#fff; border:2px solid var(--ink); border-radius:16px; box-shadow:4px 4px 0 var(--ink); }
+    .float-toolbar.mobile-more-open .mobile-tools-menu{ display:grid; }
+    .mobile-tool-option{ min-height:42px; padding:7px 9px; border:1.5px solid var(--ink); border-radius:11px; background:var(--paper-alt); color:var(--ink); font-weight:800; font-size:.78rem; }
+    .mobile-tool-option:active{ background:var(--teal); }
+    #ftColorSwatches{ justify-content:center; top:auto; bottom:calc(100% + 9px); }
+    .ft-font-dropdown{ top:auto; bottom:calc(100% + 8px); }
+    body.has-mobile-selection .tabs{ transform:translateY(105%); pointer-events:none; }
+    body.has-mobile-selection .zoom-bar{ opacity:0; pointer-events:none; }
     .handle{ width:var(--touch-handle-size,72px); height:var(--touch-handle-size,72px); border-width:var(--touch-handle-border,6px); }
     .handle-resize{ bottom:calc(var(--touch-handle-size,72px) / -2); left:calc(var(--touch-handle-size,72px) / -2); }
     .handle-rotate{ top:calc(var(--touch-handle-size,72px) * -1.6); left:calc(50% - var(--touch-handle-size,72px) / 2); }
@@ -777,18 +794,9 @@
     .topbar-actions .btn{ padding:8px 10px; font-size:0; min-width:38px; justify-content:center; box-shadow:2px 2px 0 var(--ink); }
     .topbar-actions .btn .mobile-icon{ font-size:1rem; }
     .btn-icon{ width:34px; height:34px; }
+    .history-controls .btn-icon{ width:32px; height:32px; }
     .tab-panels{ padding:52px 12px 16px; }
     .shape-grid,.sticker-grid{ grid-template-columns:repeat(4,1fr); gap:8px; }
-    .float-toolbar{ max-width:calc(100% - 10px); width:calc(100% - 10px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:16px; padding:6px; gap:5px 7px; }
-    .float-toolbar > .ft-sep{ display:none !important; }
-    .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
-    #ftColorGroup{ order:1; width:auto; justify-content:center; }
-    #ftStrokeGroup{ order:2; }
-    #ftFontGroup{ order:3; }
-    #ftEditTextGroup{ order:4; }
-    #ftSizeGroup{ order:5; }
-    #ftActionsGroup{ order:6; }
-    #ftColorSwatches{ justify-content:center; }
     .canvas-scroll{ padding:10px; padding-bottom:118px; }
     .onboarding-overlay{ padding:8px; }
     .onboarding-card{ padding:24px 14px 16px; max-height:94vh; border-radius:18px; }
@@ -822,6 +830,10 @@
     </div>
     <div class="topbar-actions">
       <button class="btn-icon" id="helpBtn" title="איך מעצבים מדבקה?">?</button>
+      <div class="history-controls" role="group" aria-label="ביטול והחזרת פעולות">
+        <button class="btn-icon" id="undoBtn" title="ביטול" aria-label="ביטול">↶</button>
+        <button class="btn-icon" id="redoBtn" title="החזרה" aria-label="החזרה">↷</button>
+      </div>
       <button class="btn btn-ghost" id="clearBtn"><span class="mobile-icon">🗑️</span> נקה הכל</button>
       <button class="btn btn-primary" id="exportBtn"><span class="mobile-icon">⬇️</span> הורדה כתמונה</button>
     </div>
@@ -1012,7 +1024,7 @@
           <div class="ft-font-dropdown" id="ftFontDropdown"></div>
         </div>
         <div class="ft-group" id="ftEditTextGroup" style="display:none;">
-          <button class="ft-select" id="ftEditText" type="button">✏️ עריכת טקסט</button>
+          <button class="ft-select" id="ftEditText" type="button">✏️ עריכה</button>
         </div>
         <div class="ft-sep" id="ftSizeSep"></div>
         <div class="ft-group" id="ftSizeGroup">
@@ -1022,6 +1034,13 @@
           <button class="ft-num-btn" id="ftSizeUp">+</button>
         </div>
         <div class="ft-sep"></div>
+        <button class="ft-icon-btn mobile-more-btn" id="ftMore" type="button" title="כלים נוספים" aria-label="כלים נוספים">•••</button>
+        <div class="mobile-tools-menu" id="mobileToolsMenu">
+          <button class="mobile-tool-option" id="mobileFont" type="button">Aa פונט הבא</button>
+          <button class="mobile-tool-option" id="mobileStroke" type="button">◯ קו מתאר</button>
+          <button class="mobile-tool-option" id="mobileDuplicate" type="button">▣ שכפול</button>
+          <button class="mobile-tool-option" id="mobileDelete" type="button">🗑 מחיקה</button>
+        </div>
         <div class="ft-group" id="ftActionsGroup">
           <button class="ft-icon-btn" id="ftFront" title="קדימה">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
@@ -1124,6 +1143,49 @@
   const pinchPoints = new Map();
   let pinchStartDistance = 0;
   let pinchStartZoom = 1;
+  const history = [];
+  let historyIndex = -1;
+  let restoringHistory = false;
+
+  function historySnapshot(){
+    return JSON.stringify({ elements, width:ARTBOARD_W, height:ARTBOARD_H,
+      background:artboard.style.background || '#FFFFFF', idCounter, zCounter });
+  }
+  function updateHistoryButtons(){
+    document.getElementById('undoBtn').disabled = historyIndex <= 0;
+    document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+  }
+  function commitHistory(){
+    if(restoringHistory) return;
+    const snapshot = historySnapshot();
+    if(history[historyIndex] === snapshot) return;
+    history.splice(historyIndex + 1);
+    history.push(snapshot);
+    if(history.length > 40) history.shift();
+    historyIndex = history.length - 1;
+    updateHistoryButtons();
+  }
+  function restoreHistory(index){
+    if(index < 0 || index >= history.length) return;
+    restoringHistory = true;
+    const state = JSON.parse(history[index]);
+    elements = state.elements;
+    ARTBOARD_W = state.width; ARTBOARD_H = state.height;
+    idCounter = state.idCounter; zCounter = state.zCounter;
+    selectedId = null;
+    artboard.style.width = ARTBOARD_W + 'px';
+    artboard.style.height = ARTBOARD_H + 'px';
+    artboard.style.background = state.background;
+    customW.value = ARTBOARD_W; customH.value = ARTBOARD_H;
+    bgColorPicker.value = rgbToHex(state.background);
+    bgColorHex.textContent = rgbToHex(state.background).toUpperCase();
+    historyIndex = index;
+    applyScale(); render();
+    restoringHistory = false;
+    updateHistoryButtons();
+  }
+  function undo(){ restoreHistory(historyIndex - 1); }
+  function redo(){ restoreHistory(historyIndex + 1); }
 
   const palette = ['#FF2D78', '#FFC93C', '#00C2A8', '#7C3AED', '#1B1035', '#FFFFFF', '#FF8FB8', '#B9F5EA'];
   const bgPalette = ['#F6F3FF', '#FFFFFF', '#FFE5F1', '#FFF3D6', '#E6F9F6', '#EFE7FF', '#1B1035'];
@@ -1309,6 +1371,25 @@
   }
 
   function shapeSVG(el){
+    // Basic rounded shapes are drawn in the element's real dimensions. This
+    // keeps their corners and outline natural instead of stretching a 100x100 icon.
+    if(el.shape === 'rect' || el.shape === 'pill' || el.shape === 'circle'){
+      const w = Math.max(24, Number(el.w) || 100);
+      const h = Math.max(24, Number(el.h) || 100);
+      const strokeWidth = el.strokeWidth || 3;
+      const pad = Math.max(2, strokeWidth / 2 + 1);
+      const stroke = el.strokeEnabled ? el.strokeColor : 'none';
+      let geometry;
+      if(el.shape === 'circle'){
+        geometry = `<ellipse cx="${w/2}" cy="${h/2}" rx="${Math.max(1,w/2-pad)}" ry="${Math.max(1,h/2-pad)}"/>`;
+      } else {
+        const radius = el.shape === 'pill'
+          ? Math.max(1, h/2-pad)
+          : Math.max(6, Math.min(22, h*.18, w*.18));
+        geometry = `<rect x="${pad}" y="${pad}" width="${Math.max(1,w-pad*2)}" height="${Math.max(1,h-pad*2)}" rx="${radius}"/>`;
+      }
+      return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" style="overflow:visible"><g fill="${el.color}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linejoin="round">${geometry}</g></svg>`;
+    }
     const paths = {
       circle:'<ellipse cx="50" cy="50" rx="47" ry="47"/>', rect:'<rect x="3" y="12" width="94" height="76" rx="16"/>', triangle:'<polygon points="50,3 97,97 3,97"/>',
       star:'<polygon points="50,3 62,36 97,38 69,59 79,95 50,75 21,95 31,59 3,38 38,36"/>', heart:'<path d="M50 94S5 67 5 35C5 14 31 6 50 29 69 6 95 14 95 35 95 67 50 94 50 94Z"/>',
@@ -1374,6 +1455,7 @@
           el.text = t.textContent || '';
           t.contentEditable = 'false';
           renderLayers();
+          commitHistory();
         });
         t.addEventListener('keydown', (e) => {
           if(e.key === 'Escape'){
@@ -1418,6 +1500,7 @@
 
     renderLayers();
     renderFloatToolbar();
+    commitHistory();
   }
 
   function updateLayerNameOnly(){
@@ -1487,8 +1570,20 @@
 
   function renderFloatToolbar(){
     const el = elements.find(e => e.id === selectedId);
-    if(!el){ floatToolbar.classList.remove('show'); return; }
+    document.body.classList.toggle('has-mobile-selection', !!el);
+    if(!el){
+      floatToolbar.classList.remove('show', 'mobile-more-open');
+      delete floatToolbar.dataset.selectionId;
+      return;
+    }
+    if(floatToolbar.dataset.selectionId !== String(el.id)){
+      floatToolbar.classList.remove('mobile-more-open');
+      floatToolbar.dataset.selectionId = String(el.id);
+    }
+    floatToolbar.classList.toggle('text-selected', el.type === 'text');
     floatToolbar.classList.add('show');
+    document.getElementById('mobileFont').style.display = el.type === 'text' ? '' : 'none';
+    document.getElementById('mobileStroke').style.display = (el.type === 'text' || el.type === 'shape') ? '' : 'none';
 
     const colorGroup = document.getElementById('ftColorGroup');
     const sizeGroup = document.getElementById('ftSizeGroup');
@@ -1563,12 +1658,39 @@
     e.stopPropagation();
     document.getElementById('ftColorSwatches').classList.toggle('open');
   });
+  document.getElementById('ftMore').addEventListener('click', (e) => {
+    e.stopPropagation();
+    floatToolbar.classList.toggle('mobile-more-open');
+  });
+  document.getElementById('mobileFont').addEventListener('click', () => {
+    const el = elements.find(item => item.id === selectedId);
+    if(!el || el.type !== 'text') return;
+    const index = hebrewFonts.findIndex(font => font.id === (el.fontFamily || 'Heebo'));
+    el.fontFamily = hebrewFonts[(index + 1 + hebrewFonts.length) % hebrewFonts.length].id;
+    floatToolbar.classList.remove('mobile-more-open');
+    render();
+  });
+  document.getElementById('mobileStroke').addEventListener('click', () => {
+    const el = elements.find(item => item.id === selectedId);
+    if(!el || (el.type !== 'text' && el.type !== 'shape')) return;
+    el.strokeEnabled = !el.strokeEnabled;
+    floatToolbar.classList.remove('mobile-more-open');
+    render();
+  });
+  document.getElementById('mobileDuplicate').addEventListener('click', () => {
+    document.getElementById('ftDuplicate').click();
+    floatToolbar.classList.remove('mobile-more-open');
+  });
+  document.getElementById('mobileDelete').addEventListener('click', () => {
+    document.getElementById('ftDelete').click();
+  });
   document.getElementById('ftEditText').addEventListener('click', () => {
     const textNode = artboard.querySelector(`.el[data-id="${selectedId}"] .el-text`);
     if(textNode) textNode.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, cancelable:true }));
   });
   document.addEventListener('pointerdown', (e) => {
     if(!e.target.closest('#ftColorGroup')) document.getElementById('ftColorSwatches').classList.remove('open');
+    if(!e.target.closest('#mobileToolsMenu') && !e.target.closest('#ftMore')) floatToolbar.classList.remove('mobile-more-open');
   });
 
   document.getElementById('ftStrokeEnabled').addEventListener('change', (e) => {
@@ -1679,6 +1801,7 @@
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
       // no full re-render here — it would wipe out an in-progress text edit
+      commitHistory();
     }
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
@@ -1721,6 +1844,7 @@
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
       renderFloatToolbar(); // refresh the size readout only
+      commitHistory();
     }
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
@@ -1742,6 +1866,7 @@
     function onUp(){
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
+      commitHistory();
     }
     document.addEventListener('pointermove', onMove);
     document.addEventListener('pointerup', onUp);
@@ -1770,6 +1895,14 @@
     const active = document.activeElement;
     const isEditingText = active && active.classList && active.classList.contains('el-text') && active.contentEditable === 'true';
     if(isEditingText) return;
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){
+      e.preventDefault();
+      e.shiftKey ? redo() : undo();
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){
+      e.preventDefault(); redo(); return;
+    }
     if((e.key === 'Delete' || e.key === 'Backspace') && selectedId){
       e.preventDefault();
       deleteEl(selectedId);
@@ -1890,6 +2023,7 @@
       sw.classList.add('checked');
       bgColorPicker.value = rgbToHex(sw.dataset.bg);
       bgColorHex.textContent = bgColorPicker.value.toUpperCase();
+      commitHistory();
     });
   });
 
@@ -1905,6 +2039,7 @@
     artboard.style.background = bgColorPicker.value;
     bgColorHex.textContent = bgColorPicker.value.toUpperCase();
     bgSwatchWrap.querySelectorAll('.swatch').forEach(s => s.classList.remove('checked'));
+    commitHistory();
   });
 
   /* ---------------- canvas size ---------------- */
@@ -1943,6 +2078,8 @@
   });
 
   /* ---------------- top bar actions ---------------- */
+  document.getElementById('undoBtn').addEventListener('click', undo);
+  document.getElementById('redoBtn').addEventListener('click', redo);
   document.getElementById('clearBtn').addEventListener('click', () => {
     if(elements.length === 0) return;
     if(confirm('למחוק את כל האלמנטים מהקנבס?')){
