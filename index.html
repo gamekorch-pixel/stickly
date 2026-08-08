@@ -94,6 +94,7 @@
   }
   .btn-primary:hover{ transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--ink); }
   .btn-primary:active{ transform:translate(0,0); box-shadow:2px 2px 0 var(--ink); }
+  .action-icon{ width:18px; height:18px; flex:0 0 auto; }
   .btn-icon{
     width:38px; height:38px; border-radius:50%;
     border:2px solid var(--ink);
@@ -182,6 +183,10 @@
     grid-template-columns:repeat(3, 1fr);
     gap:10px;
   }
+  .sticker-categories{ display:flex; gap:6px; overflow-x:auto; padding:2px 0 9px; scrollbar-width:none; }
+  .sticker-categories::-webkit-scrollbar{ display:none; }
+  .sticker-category{ flex:0 0 auto; padding:7px 10px; border:1.5px solid var(--ink); border-radius:999px; background:var(--paper-alt); font-size:.72rem; font-weight:800; }
+  .sticker-category.active{ background:var(--teal); }
   .shape-item, .sticker-item{
     aspect-ratio:1/1;
     border-radius:14px;
@@ -353,6 +358,10 @@
     transform-origin:top left;
     touch-action:none;
   }
+  .snap-guide{ display:none; position:absolute; z-index:9998; pointer-events:none; background:var(--pink); opacity:.9; }
+  .snap-guide.show{ display:block; }
+  .snap-guide.vertical{ top:0; bottom:0; left:50%; width:1.5px; transform:translateX(-50%); }
+  .snap-guide.horizontal{ left:0; right:0; top:50%; height:1.5px; transform:translateY(-50%); }
 
   .el{
     position:absolute;
@@ -590,13 +599,16 @@
   .onboarding-overlay.hidden{ display:none; }
   .onboarding-card{
     position:relative;
+    display:flex;
+    flex-direction:column;
     background:var(--paper-alt);
     border:2.5px solid var(--ink);
     border-radius:var(--radius-lg);
     box-shadow:var(--shadow-hard);
-    width:100%; max-width:560px;
+    width:100%; max-width:720px;
+    height:auto;
     max-height:88vh;
-    overflow-y:auto;
+    overflow:hidden;
     padding:30px 26px 26px;
   }
   .onboarding-close{
@@ -609,7 +621,7 @@
     font-weight:800;
   }
   .onboarding-close:hover{ background:var(--ink); color:var(--paper); }
-  .onboarding-header{ text-align:center; margin-bottom:22px; }
+  .onboarding-header{ text-align:center; margin-bottom:18px; flex-shrink:0; }
   .onboarding-badge{
     width:56px; height:56px;
     margin:0 auto 10px;
@@ -623,9 +635,9 @@
   }
   .onboarding-header h2{ font-size:1.35rem; margin-bottom:6px; }
   .onboarding-header p{ font-size:0.88rem; color:rgba(27,16,53,0.6); font-weight:600; }
-  .onboarding-steps{ display:flex; flex-direction:column; gap:14px; margin-bottom:22px; }
+  .onboarding-steps{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:14px; padding-inline:2px; overflow-y:auto; min-height:0; max-height:calc(88vh - 210px); flex:0 1 auto; overscroll-behavior:contain; }
   .onboarding-step{
-    display:grid; grid-template-columns:170px 1fr; align-items:center; gap:18px;
+    display:flex; flex-direction:column; align-items:stretch; gap:10px;
     border:2px solid var(--ink);
     border-radius:var(--radius-md);
     padding:14px 16px;
@@ -636,12 +648,14 @@
   .onboarding-step:nth-child(3) .step-illustration{ background:var(--yellow); }
   .onboarding-step:nth-child(4) .step-illustration{ background:var(--purple); }
   .step-illustration{
-    width:170px; height:104px;
+    width:100%; height:122px;
     border-radius:12px;
     border:2.5px solid var(--ink);
     display:flex; align-items:center; justify-content:center;
     font-size:1.6rem; position:relative; overflow:hidden; background:#fff !important;
   }
+  .step-illustration .tutorial-ui{ width:170px; height:104px; flex:0 0 auto; transform:scale(1.08); transform-origin:center; }
+  .step-text{ text-align:center; }
   .guide-ui{ width:100%; height:100%; position:relative; background:var(--paper); }
   .guide-side{ position:absolute; inset:0 0 0 auto; width:35%; background:#fff; border-inline-start:2px solid var(--ink); box-shadow:-4px 0 10px rgba(27,16,53,.08); }
   .guide-canvas{ position:absolute; left:13px; top:17px; width:91px; height:68px; border:2px solid var(--ink); border-radius:10px; background:linear-gradient(45deg,#fff 25%,#f3effb 25%,#f3effb 50%,#fff 50%,#fff 75%,#f3effb 75%); background-size:12px 12px; box-shadow:4px 4px 0 var(--ink); }
@@ -680,6 +694,7 @@
   .tutorial-download-btn{ position:absolute; right:8px; top:34px; width:40px; height:40px; border:2px solid var(--ink); border-radius:50%; background:var(--purple); color:#fff; display:grid; place-items:center; font-size:24px; font-weight:900; box-shadow:3px 3px 0 var(--ink); }
   .tutorial-export-top{ position:absolute; inset:0 0 auto 0; height:25px; background:#fff; border-bottom:2px solid var(--ink); display:flex; align-items:center; justify-content:space-between; padding:0 7px; }
   .tutorial-export-button{ height:16px; padding:0 8px; border:1.5px solid var(--ink); border-radius:999px; background:var(--pink); color:#fff; display:flex; align-items:center; gap:3px; font-size:7px; font-weight:800; box-shadow:2px 2px 0 var(--ink); }
+  .tutorial-export-button svg{ width:8px; height:8px; }
   .tutorial-export-canvas{ position:absolute; left:12px; right:12px; top:34px; bottom:10px; border:2px solid var(--ink); border-radius:9px; background:#fff; display:grid; place-items:center; }
   .tutorial-export-sticker{ width:43px; height:43px; border:3px solid var(--ink); border-radius:50%; background:var(--yellow); display:grid; place-items:center; font-size:23px; box-shadow:0 0 0 4px #fff, 2px 3px 0 5px var(--ink); }
   .guide-one-canvas{ position:absolute; left:12px; top:15px; width:96px; height:72px; border:2px solid var(--ink); border-radius:11px; background:#fff; box-shadow:4px 4px 0 var(--ink); display:grid; place-items:center; }
@@ -694,8 +709,7 @@
   .step-download svg{ width:26px; height:26px; }
   .step-text h3{ font-size:0.95rem; margin-bottom:3px; }
   .step-text p{ font-size:0.8rem; color:rgba(27,16,53,0.6); font-weight:500; line-height:1.45; }
-  .onboarding-start{ width:100%; justify-content:center; font-size:0.95rem; padding:14px; }
-  @media (max-width:520px){ .onboarding-step{ grid-template-columns:1fr; } .step-illustration{ width:100%; } }
+  .onboarding-start{ width:100%; justify-content:center; font-size:0.95rem; padding:14px; flex-shrink:0; position:relative; z-index:3; }
 
   /* ---- mobile ---- */
   .mobile-tabbar{ display:none; }
@@ -761,7 +775,7 @@
     #ftActionsGroup{ order:7; }
     .mobile-tools-menu{ position:absolute; left:10px; bottom:calc(100% + 10px); width:210px; padding:9px; grid-template-columns:1fr 1fr; gap:7px; background:#fff; border:2px solid var(--ink); border-radius:16px; box-shadow:4px 4px 0 var(--ink); }
     .float-toolbar.mobile-more-open .mobile-tools-menu{ display:grid; }
-    .mobile-tool-option{ min-height:42px; padding:7px 9px; border:1.5px solid var(--ink); border-radius:11px; background:var(--paper-alt); color:var(--ink); font-weight:800; font-size:.78rem; }
+    .mobile-tool-option{ min-height:42px; padding:7px 9px; border:1.5px solid var(--ink); border-radius:11px; background:var(--paper-alt); color:var(--ink); font-weight:800; font-size:.78rem; display:flex; align-items:center; justify-content:center; gap:5px; }
     .mobile-tool-option:active{ background:var(--teal); }
     #ftColorSwatches{ justify-content:center; top:auto; bottom:calc(100% + 9px); }
     .ft-font-dropdown{ top:auto; bottom:calc(100% + 8px); }
@@ -786,25 +800,33 @@
     button,.handle,.el{ -webkit-tap-highlight-color:transparent; }
   }
 
-  @media (max-width:600px){
+  @media (max-width:720px){
     .topbar{ padding:8px 10px; gap:8px; }
     .brand .badge{ width:32px; height:32px; }
     .brand-text .sub{ display:none; }
     .topbar-actions{ gap:6px; }
     .topbar-actions .btn{ padding:8px 10px; font-size:0; min-width:38px; justify-content:center; box-shadow:2px 2px 0 var(--ink); }
-    .topbar-actions .btn .mobile-icon{ font-size:1rem; }
+    .topbar-actions .btn .mobile-icon{ display:flex; align-items:center; justify-content:center; }
+    .topbar-actions .btn .action-icon{ width:19px; height:19px; }
     .btn-icon{ width:34px; height:34px; }
     .history-controls .btn-icon{ width:32px; height:32px; }
     .tab-panels{ padding:52px 12px 16px; }
     .shape-grid,.sticker-grid{ grid-template-columns:repeat(4,1fr); gap:8px; }
     .canvas-scroll{ padding:10px; padding-bottom:118px; }
     .onboarding-overlay{ padding:8px; }
-    .onboarding-card{ padding:24px 14px 16px; max-height:94vh; border-radius:18px; }
-    .onboarding-header{ margin-bottom:14px; padding-inline:24px; }
+    .onboarding-card{ padding:18px 12px 12px; height:auto; max-height:94vh; border-radius:18px; }
+    .onboarding-header{ margin-bottom:10px; padding-inline:28px; }
+    .onboarding-badge{ width:42px; height:42px; margin-bottom:6px; font-size:1.2rem; }
     .onboarding-header h2{ font-size:1.15rem; }
-    .onboarding-step{ grid-template-columns:1fr; gap:10px; padding:11px; }
-    .step-illustration{ width:100%; height:112px; }
-    .step-text h3{ font-size:0.9rem; }.step-text p{ font-size:0.75rem; }
+    .onboarding-header p{ font-size:.76rem; }
+    .onboarding-steps{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-bottom:10px; max-height:calc(94dvh - 190px); flex:0 1 auto; }
+    .onboarding-step{ display:flex; flex-direction:column; align-items:stretch; gap:7px; padding:8px; min-width:0; }
+    .step-illustration{ width:100%; height:80px; background:#fff; }
+    .step-illustration .tutorial-ui{ width:170px; height:104px; flex:0 0 auto; transform:scale(.72); transform-origin:center; }
+    .step-text{ text-align:center; min-width:0; }
+    .step-text h3{ font-size:0.78rem; line-height:1.25; margin-bottom:3px; }
+    .step-text p{ font-size:0.62rem; line-height:1.32; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .onboarding-start{ padding:12px; }
   }
 
   @media (max-width:380px){
@@ -813,6 +835,11 @@
     .shape-grid,.sticker-grid{ grid-template-columns:repeat(3,1fr); }
     .tabs{ gap:0; }
     .tab-btn{ min-width:48px; width:48px; }
+    .onboarding-step{ gap:6px; padding:7px; }
+    .step-illustration{ width:100%; height:72px; }
+    .step-illustration .tutorial-ui{ transform:scale(.64); }
+    .step-text h3{ font-size:.73rem; }
+    .step-text p{ font-size:.58rem; }
   }
 </style>
 </head>
@@ -834,8 +861,8 @@
         <button class="btn-icon" id="undoBtn" title="ביטול" aria-label="ביטול">↶</button>
         <button class="btn-icon" id="redoBtn" title="החזרה" aria-label="החזרה">↷</button>
       </div>
-      <button class="btn btn-ghost" id="clearBtn"><span class="mobile-icon">🗑️</span> נקה הכל</button>
-      <button class="btn btn-primary" id="exportBtn"><span class="mobile-icon">⬇️</span> הורדה כתמונה</button>
+      <button class="btn btn-ghost" id="clearBtn"><span class="mobile-icon"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg></span> נקה הכל</button>
+      <button class="btn btn-primary" id="exportBtn"><span class="mobile-icon"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></span> הורדת סטיקר</button>
     </div>
   </div>
 
@@ -951,6 +978,7 @@
             <button id="addCustomEmojiBtn">הוסף</button>
           </div>
           <div class="panel-sub">או בחרו מדבקה מוכנה</div>
+          <div class="sticker-categories" id="stickerCategories"></div>
           <div class="sticker-grid" id="stickerGrid"></div>
         </div>
 
@@ -1038,8 +1066,8 @@
         <div class="mobile-tools-menu" id="mobileToolsMenu">
           <button class="mobile-tool-option" id="mobileFont" type="button">Aa פונט הבא</button>
           <button class="mobile-tool-option" id="mobileStroke" type="button">◯ קו מתאר</button>
-          <button class="mobile-tool-option" id="mobileDuplicate" type="button">▣ שכפול</button>
-          <button class="mobile-tool-option" id="mobileDelete" type="button">🗑 מחיקה</button>
+          <button class="mobile-tool-option" id="mobileDuplicate" type="button"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> שכפול</button>
+          <button class="mobile-tool-option" id="mobileDelete" type="button"><svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14"/></svg> מחיקה</button>
         </div>
         <div class="ft-group" id="ftActionsGroup">
           <button class="ft-icon-btn" id="ftFront" title="קדימה">
@@ -1060,6 +1088,8 @@
       <div class="canvas-scroll">
         <div class="artboard-wrap">
           <div class="artboard" id="artboard">
+            <div class="snap-guide vertical" id="snapGuideX"></div>
+            <div class="snap-guide horizontal" id="snapGuideY"></div>
             <div class="empty-hint" id="emptyHint">
               <div class="big">🎨</div>
               הקנבס ריק — הוסיפו טקסט, צורה או מדבקה מהתפריט
@@ -1111,7 +1141,7 @@
         </div>
       </div>
       <div class="onboarding-step">
-        <div class="step-illustration step-download" role="img" aria-label="הדמיה של הורדת המדבקה מהאתר"><div class="tutorial-ui"><div class="tutorial-export-top"><i class="tutorial-logo"></i><span class="tutorial-export-button">↓ הורדה</span></div><div class="tutorial-export-canvas"><span class="tutorial-export-sticker">🌸</span></div></div></div>
+        <div class="step-illustration step-download" role="img" aria-label="הדמיה של הורדת המדבקה מהאתר"><div class="tutorial-ui"><div class="tutorial-export-top"><i class="tutorial-logo"></i><span class="tutorial-export-button"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 1v7M3.5 5.5 6 8l2.5-2.5M2 11h8"/></svg> הורדה</span></div><div class="tutorial-export-canvas"><span class="tutorial-export-sticker">🌸</span></div></div></div>
         <div class="step-text">
           <h3>4. הורידו ושתפו</h3>
           <p>מרוצים מהתוצאה? לחצו על "הורדה כתמונה" כדי לשמור את המדבקה שלכם כקובץ PNG.</p>
@@ -1189,7 +1219,13 @@
 
   const palette = ['#FF2D78', '#FFC93C', '#00C2A8', '#7C3AED', '#1B1035', '#FFFFFF', '#FF8FB8', '#B9F5EA'];
   const bgPalette = ['#F6F3FF', '#FFFFFF', '#FFE5F1', '#FFF3D6', '#E6F9F6', '#EFE7FF', '#1B1035'];
-  const stickerEmojis = ['🐱','🌈','🚀','🍩','🌵','📷','👻','🍊','⭐','❤️','☀️','☁️','🎧','🌸','🦄','⚡','🍕','🎈'];
+  const stickerCollections = {
+    '🔥 מגניבים':['🔥','⚡','🚀','🌈','⭐','👑','💎','🎧'],
+    '😂 מצחיקים':['😂','🤣','😜','🤪','🙃','🤡','👻','💩'],
+    '😭 תגובות':['😭','🥹','😱','🤯','😴','🥳','😍','🤔'],
+    '❤️ אהבה':['❤️','💕','💘','😘','🌹','🌸','🫶','💋'],
+    '🐶 חיות':['🐶','🐱','🦄','🐼','🐸','🦊','🐰','🐵']
+  };
 
   const hebrewFonts = [
   { id:'Fredoka', label:'Fredoka' },
@@ -1788,6 +1824,8 @@
     const scale = currentScale();
     const startX = e.clientX, startY = e.clientY;
     const ox = el.x, oy = el.y;
+    const guideX = document.getElementById('snapGuideX');
+    const guideY = document.getElementById('snapGuideY');
 
     function onMove(ev){
       if(pinchActive) return;
@@ -1795,11 +1833,22 @@
       const dy = (ev.clientY - startY) / scale;
       el.x = ox + dx;
       el.y = oy + dy;
+      const snapDistance = 9 / scale;
+      const centerDeltaX = (el.x + el.w/2) - ARTBOARD_W/2;
+      const centerDeltaY = (el.y + el.h/2) - ARTBOARD_H/2;
+      const snapX = Math.abs(centerDeltaX) <= snapDistance;
+      const snapY = Math.abs(centerDeltaY) <= snapDistance;
+      if(snapX) el.x = ARTBOARD_W/2 - el.w/2;
+      if(snapY) el.y = ARTBOARD_H/2 - el.h/2;
+      guideX.classList.toggle('show', snapX);
+      guideY.classList.toggle('show', snapY);
       renderPositionOnly(el);
     }
     function onUp(){
       document.removeEventListener('pointermove', onMove);
       document.removeEventListener('pointerup', onUp);
+      guideX.classList.remove('show');
+      guideY.classList.remove('show');
       // no full re-render here — it would wipe out an in-progress text edit
       commitHistory();
     }
@@ -1973,10 +2022,21 @@
   });
 
   const stickerGrid = document.getElementById('stickerGrid');
-  stickerGrid.innerHTML = stickerEmojis.map(em => `<button class="sticker-item" data-emoji="${em}">${em}</button>`).join('');
-  stickerGrid.querySelectorAll('.sticker-item').forEach(btn => {
-    btn.addEventListener('click', () => { addSticker(btn.dataset.emoji); closeMobilePanel(); });
-  });
+  const stickerCategories = document.getElementById('stickerCategories');
+  let activeStickerCategory = Object.keys(stickerCollections)[0];
+  function renderStickerLibrary(){
+    stickerCategories.innerHTML = Object.keys(stickerCollections).map(name =>
+      `<button class="sticker-category ${name===activeStickerCategory?'active':''}" data-category="${name}">${name}</button>`
+    ).join('');
+    stickerGrid.innerHTML = stickerCollections[activeStickerCategory].map(em => `<button class="sticker-item" data-emoji="${em}">${em}</button>`).join('');
+    stickerCategories.querySelectorAll('.sticker-category').forEach(btn => {
+      btn.addEventListener('click', () => { activeStickerCategory = btn.dataset.category; renderStickerLibrary(); });
+    });
+    stickerGrid.querySelectorAll('.sticker-item').forEach(btn => {
+      btn.addEventListener('click', () => { addSticker(btn.dataset.emoji); closeMobilePanel(); });
+    });
+  }
+  renderStickerLibrary();
 
   /* keyboard-emoji sticker input: type/paste an emoji using the OS emoji keyboard */
   const customEmojiInput = document.getElementById('customEmojiInput');
@@ -2136,7 +2196,7 @@
       link.download = 'stickly-sticker.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
-      showToast('ההורדה הושלמה! 🎉');
+      showToast(transparent ? 'הסטיקר מוכן! 🎉 PNG עם רקע שקוף' : 'הסטיקר מוכן! 🎉 PNG נשמר');
     } catch(err){
       console.error('Export failed', err);
       showToast('משהו השתבש בייצוא, נסו שוב');
