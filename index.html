@@ -739,16 +739,34 @@
     }
     .sidebar.open .tab-panels{ transform:translateX(0); }
     .panel-close{ display:flex; position:absolute; top:12px; left:12px; width:30px; height:30px; border:2px solid var(--ink); border-radius:50%; align-items:center; justify-content:center; background:#fff; font-weight:900; z-index:2; }
-    .canvas-scroll{ padding:16px; padding-bottom:70px; }
-    .float-toolbar{ margin:8px auto 0; max-width:calc(100% - 12px); width:calc(100% - 12px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:18px; padding:8px; gap:7px 10px; }
+    .canvas-scroll{ padding:14px; padding-bottom:118px; }
+    .float-toolbar{ margin:6px auto 0; max-width:calc(100% - 10px); width:calc(100% - 10px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:16px; padding:6px; gap:5px 7px; }
     .float-toolbar > .ft-sep{ display:none !important; }
     .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
     #ftColorGroup{ order:1; width:auto; justify-content:center; }
     #ftStrokeGroup{ order:2; }
     #ftFontGroup{ order:3; }
-    #ftSizeGroup{ order:4; }
-    #ftActionsGroup{ order:5; }
+    #ftEditTextGroup{ order:4; }
+    #ftSizeGroup{ order:5; }
+    #ftActionsGroup{ order:6; }
     #ftColorSwatches{ justify-content:center; }
+    .handle{ width:var(--touch-handle-size,72px); height:var(--touch-handle-size,72px); border-width:var(--touch-handle-border,6px); }
+    .handle-resize{ bottom:calc(var(--touch-handle-size,72px) / -2); left:calc(var(--touch-handle-size,72px) / -2); }
+    .handle-rotate{ top:calc(var(--touch-handle-size,72px) * -1.6); left:calc(50% - var(--touch-handle-size,72px) / 2); }
+    .handle-rotate::before{ top:calc(var(--touch-handle-size,72px) - var(--touch-handle-border,6px)); left:calc(50% - var(--touch-handle-border,6px) / 2); width:var(--touch-handle-border,6px); height:calc(var(--touch-handle-size,72px) * .65); }
+    .el.selected{ outline-width:3px; outline-offset:7px; }
+    .float-toolbar .ft-label{ display:none; }
+    .stroke-toggle{ font-size:0; }
+    .ft-num-btn,.ft-icon-btn{ width:34px; height:34px; font-size:.95rem; }
+    .ft-icon-btn svg{ width:16px; height:16px; }
+    .ft-color-current,.ft-stroke-color{ width:34px; height:34px; }
+    .ft-size-input{ height:34px; width:62px; font-size:.95rem; }
+    .ft-select{ min-height:34px; max-width:112px; padding:5px 10px; }
+    .zoom-bar{ position:fixed; left:50%; bottom:62px; transform:translateX(-50%); z-index:55; width:max-content; padding:6px 10px; border:2px solid var(--ink); border-radius:999px; box-shadow:3px 3px 0 var(--ink); transition:opacity .2s; }
+    .zoom-bar .ft-icon-btn{ width:42px; height:42px; font-size:1.25rem; }
+    .sidebar.open + .canvas-area .zoom-bar{ opacity:0; pointer-events:none; }
+    .tab-btn{ min-height:52px; touch-action:manipulation; }
+    button,.handle,.el{ -webkit-tap-highlight-color:transparent; }
   }
 
   @media (max-width:600px){
@@ -761,17 +779,17 @@
     .btn-icon{ width:34px; height:34px; }
     .tab-panels{ padding:52px 12px 16px; }
     .shape-grid,.sticker-grid{ grid-template-columns:repeat(4,1fr); gap:8px; }
-    .float-toolbar{ max-width:calc(100% - 12px); width:calc(100% - 12px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:18px; padding:8px; gap:7px 10px; }
+    .float-toolbar{ max-width:calc(100% - 10px); width:calc(100% - 10px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:16px; padding:6px; gap:5px 7px; }
     .float-toolbar > .ft-sep{ display:none !important; }
     .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
     #ftColorGroup{ order:1; width:auto; justify-content:center; }
     #ftStrokeGroup{ order:2; }
     #ftFontGroup{ order:3; }
-    #ftSizeGroup{ order:4; }
-    #ftActionsGroup{ order:5; }
+    #ftEditTextGroup{ order:4; }
+    #ftSizeGroup{ order:5; }
+    #ftActionsGroup{ order:6; }
     #ftColorSwatches{ justify-content:center; }
-    .canvas-scroll{ padding:10px; padding-bottom:62px; }
-    .zoom-bar{ padding:7px; }
+    .canvas-scroll{ padding:10px; padding-bottom:118px; }
     .onboarding-overlay{ padding:8px; }
     .onboarding-card{ padding:24px 14px 16px; max-height:94vh; border-radius:18px; }
     .onboarding-header{ margin-bottom:14px; padding-inline:24px; }
@@ -993,6 +1011,9 @@
           <button type="button" class="ft-select" id="ftFontBtn">טקסט מגניב</button>
           <div class="ft-font-dropdown" id="ftFontDropdown"></div>
         </div>
+        <div class="ft-group" id="ftEditTextGroup" style="display:none;">
+          <button class="ft-select" id="ftEditText" type="button">✏️ עריכת טקסט</button>
+        </div>
         <div class="ft-sep" id="ftSizeSep"></div>
         <div class="ft-group" id="ftSizeGroup">
           <span class="ft-label">גודל</span>
@@ -1099,6 +1120,10 @@
   let zCounter = 1;
   let selectedId = null;
   let userZoom = 1;
+  let pinchActive = false;
+  const pinchPoints = new Map();
+  let pinchStartDistance = 0;
+  let pinchStartZoom = 1;
 
   const palette = ['#FF2D78', '#FFC93C', '#00C2A8', '#7C3AED', '#1B1035', '#FFFFFF', '#FF8FB8', '#B9F5EA'];
   const bgPalette = ['#F6F3FF', '#FFFFFF', '#FFE5F1', '#FFF3D6', '#E6F9F6', '#EFE7FF', '#1B1035'];
@@ -1135,12 +1160,47 @@
   function applyScale(){
     const s = currentScale();
     artboard.style.transform = `scale(${s})`;
+    artboard.style.setProperty('--touch-handle-size', (32 / s) + 'px');
+    artboard.style.setProperty('--touch-handle-border', (3 / s) + 'px');
     artboardWrap.style.width = (ARTBOARD_W * s) + 'px';
     artboardWrap.style.height = (ARTBOARD_H * s) + 'px';
     document.getElementById('zoomVal').textContent = Math.round(s * 100 / (currentScale()/userZoom)) + '%';
     document.getElementById('zoomVal').textContent = Math.round(userZoom * 100) + '%';
   }
   window.addEventListener('resize', applyScale);
+
+  function touchDistance(){
+    const pts = Array.from(pinchPoints.values());
+    if(pts.length < 2) return 0;
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  }
+  canvasScroll.addEventListener('pointerdown', (e) => {
+    if(e.pointerType !== 'touch') return;
+    pinchPoints.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(pinchPoints.size === 2){
+      pinchActive = true;
+      pinchStartDistance = touchDistance();
+      pinchStartZoom = userZoom;
+    }
+  }, { capture:true });
+  canvasScroll.addEventListener('pointermove', (e) => {
+    if(!pinchPoints.has(e.pointerId)) return;
+    pinchPoints.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(pinchActive && pinchPoints.size >= 2){
+      e.preventDefault();
+      const distance = touchDistance();
+      if(pinchStartDistance > 0){
+        userZoom = Math.max(0.35, Math.min(3, pinchStartZoom * distance / pinchStartDistance));
+        applyScale();
+      }
+    }
+  }, { capture:true, passive:false });
+  function finishPinchPointer(e){
+    pinchPoints.delete(e.pointerId);
+    if(pinchPoints.size < 2) setTimeout(() => { pinchActive = false; }, 0);
+  }
+  canvasScroll.addEventListener('pointerup', finishPinchPointer, { capture:true });
+  canvasScroll.addEventListener('pointercancel', finishPinchPointer, { capture:true });
 
   /* ---------------- element factory ---------------- */
   function baseEl(type, extra){
@@ -1468,9 +1528,11 @@
     const fontGroup = document.getElementById('ftFontGroup');
     const fontBtn = document.getElementById('ftFontBtn');
     const fontDropdown = document.getElementById('ftFontDropdown');
+    const editTextGroup = document.getElementById('ftEditTextGroup');
     if(el.type === 'text'){
       fontSep.style.display = 'block';
       fontGroup.style.display = 'flex';
+      editTextGroup.style.display = 'flex';
       fontBtn.style.fontFamily = `'${el.fontFamily || 'Heebo'}', sans-serif`;
       fontDropdown.querySelectorAll('.ft-font-option').forEach(opt => {
         opt.classList.toggle('active', opt.dataset.font === (el.fontFamily || 'Heebo'));
@@ -1478,6 +1540,7 @@
     } else {
       fontSep.style.display = 'none';
       fontGroup.style.display = 'none';
+      editTextGroup.style.display = 'none';
       fontDropdown.classList.remove('open');
     }
 
@@ -1499,6 +1562,10 @@
   document.getElementById('ftColorButton').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('ftColorSwatches').classList.toggle('open');
+  });
+  document.getElementById('ftEditText').addEventListener('click', () => {
+    const textNode = artboard.querySelector(`.el[data-id="${selectedId}"] .el-text`);
+    if(textNode) textNode.dispatchEvent(new MouseEvent('dblclick', { bubbles:true, cancelable:true }));
   });
   document.addEventListener('pointerdown', (e) => {
     if(!e.target.closest('#ftColorGroup')) document.getElementById('ftColorSwatches').classList.remove('open');
@@ -1601,6 +1668,7 @@
     const ox = el.x, oy = el.y;
 
     function onMove(ev){
+      if(pinchActive) return;
       const dx = (ev.clientX - startX) / scale;
       const dy = (ev.clientY - startY) / scale;
       el.x = ox + dx;
@@ -1626,6 +1694,7 @@
     const uniform = el.type === 'sticker';
 
     function onMove(ev){
+      if(pinchActive) return;
       const dx = (ev.clientX - startX) / scale;
       const dy = (ev.clientY - startY) / scale;
       if(ev.shiftKey){
@@ -1665,6 +1734,7 @@
     const cy = rect.top + rect.height/2;
 
     function onMove(ev){
+      if(pinchActive) return;
       const angle = Math.atan2(ev.clientY - cy, ev.clientX - cx) * 180/Math.PI;
       el.rot = Math.round(angle + 90);
       renderPositionOnly(el);
