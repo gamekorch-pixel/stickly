@@ -303,6 +303,11 @@
     width:22px; height:22px; border-radius:50%;
     border:2px solid var(--ink); cursor:pointer;
   }
+  #ftColorGroup{ position:relative; }
+  .ft-color-current{ width:28px; height:28px; border:2px solid var(--ink); border-radius:50%; background:var(--pink); box-shadow:0 0 0 2px #fff; flex-shrink:0; }
+  #ftColorSwatches{ display:none !important; position:absolute; top:calc(100% + 9px); right:0; grid-template-columns:repeat(4,28px); gap:7px !important; padding:10px; background:#fff; border:2px solid var(--ink); border-radius:14px; box-shadow:var(--shadow-soft); z-index:120; }
+  #ftColorSwatches.open{ display:grid !important; }
+  #ftColorSwatches .ft-swatch{ width:28px; height:28px; }
   .ft-num-btn{
     width:24px; height:24px; border-radius:50%;
     border:1.5px solid var(--ink);
@@ -374,7 +379,7 @@
 
   .el-shape{ width:100%; height:100%; }
   .el-sticker{ font-size:64px; line-height:1; }
-  .el-image img{ width:100%; height:100%; object-fit:contain; pointer-events:none; }
+  .el-image img{ width:auto; height:auto; max-width:100%; max-height:100%; display:block; pointer-events:none; }
 
   .handle{
     position:absolute;
@@ -738,7 +743,7 @@
     .float-toolbar{ margin:8px auto 0; max-width:calc(100% - 12px); width:calc(100% - 12px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:18px; padding:8px; gap:7px 10px; }
     .float-toolbar > .ft-sep{ display:none !important; }
     .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
-    #ftColorGroup{ order:1; width:100%; justify-content:center; }
+    #ftColorGroup{ order:1; width:auto; justify-content:center; }
     #ftStrokeGroup{ order:2; }
     #ftFontGroup{ order:3; }
     #ftSizeGroup{ order:4; }
@@ -759,7 +764,7 @@
     .float-toolbar{ max-width:calc(100% - 12px); width:calc(100% - 12px); flex-wrap:wrap; justify-content:center; overflow:visible; max-height:none; border-radius:18px; padding:8px; gap:7px 10px; }
     .float-toolbar > .ft-sep{ display:none !important; }
     .float-toolbar .ft-group,.float-toolbar .stroke-controls{ flex-shrink:0; }
-    #ftColorGroup{ order:1; width:100%; justify-content:center; }
+    #ftColorGroup{ order:1; width:auto; justify-content:center; }
     #ftStrokeGroup{ order:2; }
     #ftFontGroup{ order:3; }
     #ftSizeGroup{ order:4; }
@@ -971,7 +976,8 @@
       <div class="float-toolbar" id="floatToolbar">
         <div class="ft-group" id="ftColorGroup">
           <span class="ft-label">צבע</span>
-          <div id="ftColorSwatches" style="display:flex; gap:6px;"></div>
+          <button type="button" class="ft-color-current" id="ftColorButton" aria-label="בחירת צבע" title="בחירת צבע"></button>
+          <div id="ftColorSwatches"></div>
         </div>
         <div class="ft-sep" id="ftStrokeSep"></div>
         <div class="stroke-controls" id="ftStrokeGroup">
@@ -1205,6 +1211,7 @@
     const el = baseEl('image', {
       src,
       w, h,
+      aspectRatio: (opts && opts.aspectRatio) || (w / h),
       x: ARTBOARD_W/2 - w/2,
       y: ARTBOARD_H/2 - h/2
     });
@@ -1443,11 +1450,13 @@
 
     if(el.type === 'text' || el.type === 'shape'){
       colorGroup.style.display = 'flex';
+      document.getElementById('ftColorButton').style.background = el.color;
       swatchWrap.innerHTML = palette.map(c => `<span class="ft-swatch" style="background:${c}" data-color="${c}"></span>`).join('');
       swatchWrap.querySelectorAll('.ft-swatch').forEach(sw => {
-        sw.addEventListener('click', () => {
-          if(el.type === 'text') el.color = sw.dataset.color;
-          else el.color = sw.dataset.color;
+        sw.addEventListener('click', (e) => {
+          e.stopPropagation();
+          el.color = sw.dataset.color;
+          swatchWrap.classList.remove('open');
           render();
         });
       });
@@ -1486,6 +1495,14 @@
       document.getElementById('ftSizeVal').value = Math.round(el.w);
     }
   }
+
+  document.getElementById('ftColorButton').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('ftColorSwatches').classList.toggle('open');
+  });
+  document.addEventListener('pointerdown', (e) => {
+    if(!e.target.closest('#ftColorGroup')) document.getElementById('ftColorSwatches').classList.remove('open');
+  });
 
   document.getElementById('ftStrokeEnabled').addEventListener('change', (e) => {
     const el = elements.find(item => item.id === selectedId);
@@ -1776,7 +1793,20 @@
     const file = e.target.files[0];
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => { addImage(ev.target.result); closeMobilePanel(); };
+    reader.onload = (ev) => {
+      const src = ev.target.result;
+      const probe = new Image();
+      probe.onload = () => {
+        const maxSide = 260;
+        const ratio = probe.naturalWidth / probe.naturalHeight || 1;
+        const w = ratio >= 1 ? maxSide : maxSide * ratio;
+        const h = ratio >= 1 ? maxSide / ratio : maxSide;
+        addImage(src, { w, h, aspectRatio: ratio });
+        closeMobilePanel();
+      };
+      probe.onerror = () => { addImage(src); closeMobilePanel(); };
+      probe.src = src;
+    };
     reader.readAsDataURL(file);
     e.target.value = '';
   });
